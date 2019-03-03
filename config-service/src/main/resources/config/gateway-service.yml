@@ -1,0 +1,72 @@
+server:
+  port: 8060
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8061/eureka/
+
+logging:
+  pattern: 
+    console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+      - id: employee-service
+        uri: lb://employee-service
+        predicates:
+        - Path=/employee/**
+        filters:
+        - RewritePath=/employee/(?<path>.*), /$\{path}
+      - id: department-service
+        uri: lb://department-service
+        predicates:
+        - Path=/department/**
+        filters:
+        - RewritePath=/department/(?<path>.*), /$\{path}
+      - id: organization-service
+        uri: lb://organization-service
+        predicates:
+        - Path=/organization/**
+        filters:
+        - RewritePath=/organization/(?<path>.*), /$\{path}
+      - id: sso-auth-service
+        uri: lb://sso-auth-service
+        predicates:
+        - Path=/sso-auth/**
+        filters:
+        - RewritePath=/sso-auth/(?<path>.*), /$\{path}
+      - id: gnoc-od-service
+        uri: lb://gnoc-od-service
+        predicates:
+        - Path=/gnoc-od/**
+        filters:
+        - RewritePath=/gnoc-od/(?<path>.*), /$\{path}
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 30000
+
+ribbon:
+  ReadTimeout: 60000
+  connection-timeout: 3000
+  eureka:
+    enabled: true
+
+zuul:
+  host:
+    connect-timeout-millis: 5000
+    max-per-route-connections: 10000
+    max-total-connections: 5000
+    socket-timeout-millis: 60000
+  semaphore: 
+    max-semaphores: 500
